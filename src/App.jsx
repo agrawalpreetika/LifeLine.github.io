@@ -10,6 +10,7 @@ import OrganizerPortal from './pages/OrganizerPortal';
 import DonationCampsPage from './pages/DonationCampsPage';
 import HospitalSignup from './pages/HospitalSignup';
 import HospitalDashboard from './pages/HospitalDashboard';
+import ProfileSettings from './pages/ProfileSettings';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
               <Route path="/camps" element={<DonationCampsPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/settings" element={<ProfileSettings />} />
               <Route path="/test-admin" element={<TestAdminPage />} />
               <Route path="/organizer" element={<OrganizerPortal />} />
               <Route path="/hospital-signup" element={<HospitalSignup />} />

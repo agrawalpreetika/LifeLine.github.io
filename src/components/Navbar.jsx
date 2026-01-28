@@ -71,12 +71,18 @@ export default function Navbar() {
                 )}
 
                 <div className="flex items-center gap-4 pl-4 border-l border-slate-200">
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <div className="bg-brand-100 p-1.5 rounded-full">
+                  <Link
+                    to="/settings"
+                    className="flex items-center gap-2 text-slate-600 hover:text-brand-600 transition-colors group"
+                    title="Profile Settings"
+                  >
+                    <div className="bg-brand-100 p-1.5 rounded-full group-hover:bg-brand-200 transition-colors">
                       <User className="h-4 w-4 text-brand-600" />
                     </div>
-                    <span className="text-sm font-medium truncate max-w-[150px]">{currentUser.email}</span>
-                  </div>
+                    <span className="text-sm font-medium truncate max-w-[150px]">
+                      {currentUser.displayName || currentUser.email}
+                    </span>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 text-slate-500 hover:text-brand-600 font-medium transition-colors text-sm"
@@ -120,10 +126,14 @@ export default function Navbar() {
                 )}
 
                 <div className="px-3 py-3 border-t border-slate-100 mt-2">
-                  <div className="flex items-center gap-2 text-slate-600 mb-3">
+                  <Link
+                    to="/settings"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 text-slate-600 mb-3 hover:text-brand-600 transition-colors"
+                  >
                     <User className="h-5 w-5" />
-                    <span className="font-medium">{currentUser.email}</span>
-                  </div>
+                    <span className="font-medium">{currentUser.displayName || currentUser.email}</span>
+                  </Link>
                   <button
                     onClick={() => {
                       handleLogout();
