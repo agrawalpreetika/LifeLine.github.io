@@ -3,7 +3,8 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
-    onAuthStateChanged
+    onAuthStateChanged,
+    updateProfile
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -17,8 +18,13 @@ export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    function signup(email, password) {
-        return createUserWithEmailAndPassword(auth, email, password);
+    function signup(email, password, fullName) {
+        return createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
+            if (fullName) {
+                await updateProfile(userCredential.user, { displayName: fullName });
+            }
+            return userCredential;
+        });
     }
 
     function login(email, password) {

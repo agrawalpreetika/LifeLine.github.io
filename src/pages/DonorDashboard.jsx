@@ -124,10 +124,13 @@ export default function DonorDashboard() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Welcome back, {currentUser.email}</h1>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Welcome back, {profile.name}
+            </h1>
             <p className="text-slate-600 mt-1">Here's your donation activity and health overview.</p>
           </div>
           {profile?.isDonor && (
+            // ... existing buttons ...
             <div className="flex gap-3">
               {profile?.isEligible ? (
                 <button className="bg-brand-500 hover:bg-brand-600 text-white px-6 py-2.5 rounded-xl font-medium shadow-sm transition-colors flex items-center gap-2">

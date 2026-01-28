@@ -227,12 +227,12 @@ export default function SeekerDashboard() {
         try {
             await requestBlood(
                 currentUser.uid,
-                currentUser.email.split('@')[0], // Simple name derived from email
+                currentUser.displayName || currentUser.email.split('@')[0],
                 donor.id,
                 bloodType || donor.donorProfile.bloodType,
-                donor.email.split('@')[0] // Passing donor name (simplified from email)
+                donor.name || donor.email.split('@')[0]
             );
-            toast.success(`Request sent to ${donor.email.split('@')[0]}!`, { id: loadingToast });
+            toast.success(`Request sent to ${donor.name || donor.email.split('@')[0]}!`, { id: loadingToast });
         } catch (error) {
             console.error("Error requesting blood:", error);
             toast.error("Failed to send request. Please try again.", { id: loadingToast });
@@ -320,13 +320,13 @@ export default function SeekerDashboard() {
                                 <div className="grid md:grid-cols-2 gap-4">
                                     {filteredRequests.map(req => (
                                         <div key={req.id} className={`p-5 rounded-xl border shadow-sm flex flex-col justify-between gap-4 ${req.status === 'accepted' ? 'border-green-200 bg-green-50' :
-                                                req.status === 'pending' ? 'border-slate-100 bg-white' : 'border-slate-100 bg-slate-50 opacity-75'
+                                            req.status === 'pending' ? 'border-slate-100 bg-white' : 'border-slate-100 bg-slate-50 opacity-75'
                                             }`}>
                                             <div>
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${req.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                                            req.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                                req.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-200 text-slate-600'
+                                                        req.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                            req.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-200 text-slate-600'
                                                         }`}>
                                                         {req.status.toUpperCase()}
                                                     </span>
@@ -553,7 +553,7 @@ export default function SeekerDashboard() {
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-900">
-                                            {donor.email.split('@')[0]}
+                                            {donor.name || donor.email.split('@')[0]}
                                         </h3>
                                         <div className="flex items-center text-slate-500 text-sm mt-1 gap-4">
                                             <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {donor.donorProfile.city}</span>
