@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { addDonationCamp, getDonationCamps } from '../lib/firestore';
 import { MapPin, Calendar, Phone, User, Save, Plus, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import LocationPickerMap from '../components/LocationPickerMap';
 
 export default function OrganizerPortal() {
   const { currentUser } = useAuth();
@@ -18,7 +19,7 @@ export default function OrganizerPortal() {
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 }); // Placeholder for geocoding
+  const [coordinates, setCoordinates] = useState({ lat: 40.7128, lng: -74.0060 }); // Default to NY
 
   const [message, setMessage] = useState('');
 
@@ -41,15 +42,16 @@ export default function OrganizerPortal() {
     }
   };
 
+  const handleLocationSelect = (locationData) => {
+    setCoordinates({ lat: locationData.lat, lng: locationData.lng });
+    if (locationData.address) {
+      setAddress(locationData.address);
+    }
+  };
+
   const handleAddCamp = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // In a real app, you would use a Geocoding API (like Google Maps API) here 
-    // to convert the address string into lat/lng coordinates.
-    // For this MVP, we'll simulate it with random offsets near a central point or just placeholder values.
-    const mockLat = 40.7128 + (Math.random() - 0.5) * 0.1; // Near New York
-    const mockLng = -74.0060 + (Math.random() - 0.5) * 0.1;
 
     try {
       await addDonationCamp(currentUser.uid, {
@@ -60,7 +62,7 @@ export default function OrganizerPortal() {
         date,
         startTime,
         endTime,
-        location: { lat: mockLat, lng: mockLng }
+        location: coordinates
       });
 
       setMessage('Donation camp added successfully!');
@@ -241,47 +243,11 @@ export default function OrganizerPortal() {
           {/* Map & List Placeholder */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 min-h-[400px] flex flex-col">
-              <h2 className="text-xl font-bold text-slate-900 mb-4">Global Camp Map</h2>
-              <div className="flex-1 bg-slate-100 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden">
-                {/* 
-                       In a real application, you would render a library like 'react-leaflet' or 'google-maps-react' here.
-                       The markers would be generated from the 'camps' state.
-                       
-                       Example Pseudo-code:
-                       <Map center={[40.7128, -74.0060]} zoom={13}>
-                           {camps.map(camp => (
-                               <Marker position={[camp.location.lat, camp.location.lng]} />
-                           ))}
-                       </Map>
-                   */}
-
-                {/* Simple Visualization for MVP */}
-                <div className="absolute inset-0 p-4">
-                  {camps.map((camp, index) => (
-                    <div
-                      key={camp.id}
-                      className="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
-                      style={{
-                        left: `${50 + (camp.location.lng + 74.0060) * 1000}%`,
-                        top: `${50 - (camp.location.lat - 40.7128) * 1000}%`
-                      }}
-                      title={camp.campName}
-                    >
-                      <MapPin className="h-8 w-8 text-red-500 drop-shadow-md" fill="currentColor" />
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                        {camp.campName}
-                      </div>
-                    </div>
-                  ))}
-                  <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-md text-xs text-slate-500 shadow-sm">
-                    Interactive Map Preview (Mock)
-                  </div>
-                </div>
-
-                {camps.length === 0 && (
-                  <p className="text-slate-400 font-medium">No active camps on the map yet.</p>
-                )}
-              </div>
+              <h2 className="text-xl font-bold text-slate-900 mb-4">Camp Location Selector</h2>
+              <p className="text-sm text-slate-500 mb-4">
+                Search for a venue or drag the marker to pinpoint the exact location. The address will update automatically.
+              </p>
+              <LocationPickerMap onLocationSelect={handleLocationSelect} />
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
