@@ -13,6 +13,7 @@ export default function Register() {
   const [organizationName, setOrganizationName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false); // New state to block updates during redirect
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -35,6 +36,8 @@ export default function Register() {
     try {
       setError('');
       setLoading(true);
+      setIsRedirecting(true); // Start blocking updates
+
       const userCredential = await signup(email, password, fullName);
 
       // Create user profile in Firestore
@@ -48,17 +51,22 @@ export default function Register() {
         userData.organizationName = organizationName;
       }
 
+      // Wait for Firestore write to complete BEFORE navigating
       await createUserProfile(userCredential.user.uid, userData);
 
-      if (role === 'organizer') {
-        navigate('/organizer');
-      } else {
-        navigate('/dashboard');
-      }
+      // Force a small delay to ensure AuthContext picks up the new role if it re-fetches
+      // though our manual navigation below should handle it.
+
+      // Force a hard navigation to ensure state is clean and router picks up the new role
+      window.location.href = role === 'organizer' ? '/organizer' : '/dashboard';
+
     } catch (err) {
+      console.error(err);
       setError('Failed to create an account: ' + err.message);
+      setIsRedirecting(false); // Reset on error
+      setLoading(false);
     }
-    setLoading(false);
+    // Don't set loading false on success to prevent UI flicker before redirect completes
   }
 
   return (
