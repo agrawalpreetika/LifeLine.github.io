@@ -501,27 +501,32 @@ export default function SeekerDashboard() {
                                 const totalStock = hospital.bloodStock ? Object.values(hospital.bloodStock).reduce((a, b) => a + b, 0) : 0;
 
                                 return (
-                                    <div key={hospital.id} className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:border-blue-200 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                                        <div className="w-full sm:w-auto">
-                                            <h3 className="font-bold text-lg text-slate-900">{hospital.hospitalName}</h3>
-                                            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 mt-1">
+                                    <div key={hospital.id} className="bg-white p-4 sm:p-5 rounded-xl border border-slate-100 shadow-sm hover:border-blue-200 transition-all flex flex-col lg:flex-row justify-between lg:items-center gap-4 w-full overflow-hidden">
+                                        {/* Left Side: Hospital Info */}
+                                        <div className="flex-1 min-w-0"> {/* min-w-0 allows text truncation to work */}
+                                            <h3 className="font-bold text-lg text-slate-900 truncate">{hospital.hospitalName}</h3>
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500 mt-1">
                                                 {distance && (
-                                                    <span className="flex items-center gap-1 text-blue-600 font-medium">
-                                                        <Navigation className="h-3 w-3" /> {distance} km away
+                                                    <span className="flex items-center gap-1 text-blue-600 font-medium shrink-0">
+                                                        <Navigation className="h-3.5 w-3.5" /> {distance} km away
                                                     </span>
                                                 )}
-                                                <span className="flex items-center gap-1">
-                                                    <Droplet className="h-3 w-3" /> {totalStock} units available
+                                                <span className="flex items-center gap-1 shrink-0">
+                                                    <Droplet className="h-3.5 w-3.5 text-red-500" /> {totalStock} units
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-slate-400 mt-1 truncate max-w-full sm:max-w-[250px]">{hospital.address}</p>
+                                            <p className="text-xs text-slate-400 mt-2 line-clamp-2 sm:line-clamp-1">
+                                                {hospital.address}
+                                            </p>
                                         </div>
-                                        <div className="flex flex-col gap-2 w-full sm:w-auto sm:min-w-[140px]">
+
+                                        {/* Right Side: Action Buttons */}
+                                        <div className="grid grid-cols-2 lg:flex lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[140px]">
                                             <a
                                                 href={`https://www.google.com/maps/dir/?api=1&destination=${hospital.location?.lat},${hospital.location?.lng}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="w-full px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                                                className="flex-1 px-3 py-2.5  rounded-lg text-xs sm:text-sm font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2 "
                                             >
                                                 <Navigation className="h-4 w-4" />
                                                 Directions
@@ -530,19 +535,18 @@ export default function SeekerDashboard() {
                                             {hospital.phoneNumber ? (
                                                 <a
                                                     href={`tel:${hospital.phoneNumber}`}
-                                                    className="w-full px-4 py-2 bg-white border border-green-200 text-green-700 rounded-lg text-sm font-bold hover:bg-green-50 transition-colors flex items-center justify-center gap-2"
+                                                    className="flex-1 px-3 py-2.5 bg-white border border-green-500 text-green-600 rounded-lg text-xs sm:text-sm font-bold hover:bg-green-50 transition-all flex items-center justify-center gap-2"
                                                 >
                                                     <Phone className="h-4 w-4" />
-                                                    Call
+                                                    <span>Call</span>
                                                 </a>
                                             ) : (
                                                 <button
                                                     disabled
-                                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 text-slate-400 rounded-lg text-sm font-bold cursor-not-allowed flex items-center justify-center gap-2"
-                                                    title="Phone number not provided"
+                                                    className="flex-1 px-3 py-2.5 bg-slate-50 border border-slate-200 text-slate-400 rounded-lg text-xs sm:text-sm font-bold cursor-not-allowed flex items-center justify-center gap-2"
                                                 >
                                                     <Phone className="h-4 w-4" />
-                                                    No Phone
+                                                    <span>No Phone</span>
                                                 </button>
                                             )}
                                         </div>
