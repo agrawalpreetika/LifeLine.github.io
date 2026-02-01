@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Calendar, Droplet, Clock, ChevronRight, AlertCircle, Plus, CheckCircle, Lock, MessageCircle, MapPin, X, Award, BadgeCheck, Download } from 'lucide-react';
+import { User, Calendar, Droplet, Clock, ChevronRight, AlertCircle, Plus, CheckCircle, Lock, MessageCircle, MapPin, X, Award, BadgeCheck, Download, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
   getUserProfile,
@@ -482,6 +482,16 @@ export default function DonorDashboard() {
                 >
                   <CheckCircle className="h-4 w-4" />
                   Check Eligibility
+                </button>
+              )}
+
+              {profile?.isEligible && (
+                <button
+                  onClick={() => setShowQuiz(true)}
+                  className="bg-white border-2 border-brand-100 text-brand-600 hover:bg-brand-50 px-6 py-2.5 rounded-xl font-bold transition-colors flex items-center gap-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Re-check Eligibility
                 </button>
               )}
             </div>

@@ -1,46 +1,93 @@
 import React, { useState } from 'react';
 import { updateDonorEligibility } from '../lib/firestore';
-import { CheckCircle, XCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, ChevronLeft, RefreshCw, Info } from 'lucide-react';
 
 export default function DonorEligibilityQuiz({ userId, onComplete, onClose }) {
     const [step, setStep] = useState(0);
-    const [answers, setAnswers] = useState({
-        age: '',
-        weight: '',
-        hasTattoo: null,
-        hasFever: null,
-        onMedication: null
-    });
+    const [answers, setAnswers] = useState({});
     const [result, setResult] = useState(null); // 'passed' | 'failed'
-    const [failReason, setFailReason] = useState('');
+    const [failReasons, setFailReasons] = useState([]);
 
     const questions = [
         {
-            key: 'age',
-            question: "How old are you?",
-            type: 'number',
-            suffix: 'years'
+            key: 'medication',
+            question: "Are you currently taking any medication (e.g., antibiotics, blood thinners)?",
+            type: 'boolean',
+            correctAnswer: false,
+            failMessage: "Certain medications (antibiotics, blood thinners) may prevent you from donating. Please consult a doctor.",
+            explanation: "Some medications can affect the recipient or your own health during donation."
         },
         {
-            key: 'weight',
-            question: "What is your weight?",
-            type: 'number',
-            suffix: 'kg'
+            key: 'age_group',
+            question: "Are you between 18 to 65 years of age?",
+            type: 'boolean',
+            correctAnswer: true,
+            failMessage: "Donors must be between 18 and 65 years old.",
+            explanation: "This age range ensures you are legally able to consent and physically mature enough to donate safely."
         },
         {
-            key: 'hasTattoo',
-            question: "Have you had a tattoo or piercing in the last 6 months?",
-            type: 'boolean'
+            key: 'weight_check',
+            question: "Is your body weight at least 45 kg?",
+            type: 'boolean',
+            correctAnswer: true,
+            failMessage: "Donors must weigh at least 45kg.",
+            explanation: "You need a certain body mass to safely lose 450ml of blood without health risks."
         },
         {
-            key: 'hasFever',
-            question: "Do you currently have a fever or flu-like symptoms?",
-            type: 'boolean'
+            key: 'recent_donation',
+            question: "Have you donated blood in the last 3 months?",
+            type: 'boolean',
+            correctAnswer: false,
+            failMessage: "You must wait at least 3 months between blood donations.",
+            explanation: "Your body needs this time to replenish its iron stores and red blood cells."
         },
         {
-            key: 'onMedication',
-            question: "Are you currently taking any antibiotics or other medication?",
-            type: 'boolean'
+            key: 'health_today',
+            question: "Have you had any infection, fever, cold, cough, weakness, dizziness, or fatigue today?",
+            type: 'boolean',
+            correctAnswer: false,
+            failMessage: "You must be in good health and symptom-free to donate.",
+            explanation: "Donating while sick can worsen your condition and transmit infections to the recipient."
+        },
+        {
+            key: 'surgery_dental',
+            question: "Have you undergone any surgery or major dental procedure recently (last 6–12 months)?",
+            type: 'boolean',
+            correctAnswer: false,
+            failMessage: "Recent surgeries or major dental procedures require a recovery period before donating.",
+            explanation: "Surgery increases the risk of infection and your body needs energy to heal fully first."
+        },
+        {
+            key: 'sleep',
+            question: "Did you have at least 6 hours of sleep last night?",
+            type: 'boolean',
+            correctAnswer: true,
+            failMessage: "A minimum of 6 hours of sleep is required to ensure your safety during donation.",
+            explanation: "Lack of sleep increases the risk of dizziness, fainting, and fatigue after donation."
+        },
+        {
+            key: 'meal',
+            question: "Did you eat a light (non-oily) meal 2–3 hours before donating?",
+            type: 'boolean',
+            correctAnswer: true,
+            failMessage: "Eating a light meal beforehand helps prevent dizziness and maintains blood sugar.",
+            explanation: "Donating on an empty stomach can cause a drop in blood sugar and lead to fainting."
+        },
+        {
+            key: 'tattoo_piercing',
+            question: "Have you had any tattoos, piercings, or acupuncture in the last 6 months?",
+            type: 'boolean',
+            correctAnswer: false,
+            failMessage: "There is a 6-month waiting period after tattoos, piercings, or acupuncture.",
+            explanation: "Needles can introduce infections like Hepatitis, which may not show up in tests immediately."
+        },
+        {
+            key: 'alcohol',
+            question: "Have you consumed alcohol in the last 24 hours?",
+            type: 'boolean',
+            correctAnswer: false,
+            failMessage: "You must avoid alcohol for at least 24 hours before donating.",
+            explanation: "Alcohol causes dehydration, which makes it harder for your body to recover after donating."
         }
     ];
 
@@ -52,38 +99,22 @@ export default function DonorEligibilityQuiz({ userId, onComplete, onClose }) {
         if (step < questions.length - 1) {
             setStep(step + 1);
         } else {
-            // Calculate Result
             calculateResult();
         }
     };
 
     const calculateResult = async () => {
-        const age = Number(answers.age);
-        const weight = Number(answers.weight);
-        const { hasTattoo, hasFever, onMedication } = answers;
-
-        let isEligible = true;
-        let reason = '';
-
-        if (age < 18 || age > 65) {
-            isEligible = false;
-            reason = "Donors must be between 18 and 65 years old.";
-        } else if (weight <= 50) {
-            isEligible = false;
-            reason = "Donors must weigh more than 50kg.";
-        } else if (hasTattoo) {
-            isEligible = false;
-            reason = "You must wait 6 months after getting a tattoo or piercing.";
-        } else if (hasFever) {
-            isEligible = false;
-            reason = "You cannot donate while you have a fever or flu symptoms.";
-        } else if (onMedication) {
-            isEligible = false;
-            reason = "Certain medications may prevent you from donating. Please consult a doctor.";
+        let reasons = [];
+        
+        for (const q of questions) {
+            if (answers[q.key] !== q.correctAnswer) {
+                reasons.push(q.failMessage);
+            }
         }
 
+        const isEligible = reasons.length === 0;
+        setFailReasons(reasons);
         setResult(isEligible ? 'passed' : 'failed');
-        setFailReason(reason);
 
         // Update Database
         if (userId) {
@@ -93,10 +124,17 @@ export default function DonorEligibilityQuiz({ userId, onComplete, onClose }) {
         if (onComplete) onComplete(isEligible);
     };
 
+    const handleRetake = () => {
+        setStep(0);
+        setAnswers({});
+        setResult(null);
+        setFailReasons([]);
+    };
+
     if (result) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl">
+                <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-xl max-h-[90vh] overflow-y-auto">
                     {result === 'passed' ? (
                         <div className="space-y-4">
                             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -104,6 +142,12 @@ export default function DonorEligibilityQuiz({ userId, onComplete, onClose }) {
                             </div>
                             <h2 className="text-2xl font-bold text-slate-900">You are Eligible!</h2>
                             <p className="text-slate-600">Great news! You meet all the basic requirements to donate blood.</p>
+                            
+                            <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-3 text-blue-800 text-sm text-left">
+                                <Info className="h-5 w-5 shrink-0 mt-0.5" />
+                                <p>Note: A doctor will re-verify donor eligibility before actual blood donation to ensure your safety and the recipient's safety.</p>
+                            </div>
+
                             <button
                                 onClick={onClose}
                                 className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-colors"
@@ -117,16 +161,35 @@ export default function DonorEligibilityQuiz({ userId, onComplete, onClose }) {
                                 <XCircle className="h-10 w-10 text-red-600" />
                             </div>
                             <h2 className="text-2xl font-bold text-slate-900">Not Eligible at this time</h2>
-                            <p className="text-slate-600">{failReason}</p>
-                            <div className="bg-slate-50 p-4 rounded-xl text-sm text-slate-500">
-                                Don't worry! This is often temporary. Please check back later when you meet the criteria.
+                            
+                            <div className="text-left bg-red-50 p-4 rounded-xl space-y-2">
+                                <p className="font-bold text-red-800 mb-2">Reasons:</p>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-red-700">
+                                    {failReasons.map((reason, idx) => (
+                                        <li key={idx}>{reason}</li>
+                                    ))}
+                                </ul>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-colors"
-                            >
-                                Close
-                            </button>
+
+                            <p className="text-slate-500 text-sm">
+                                Don't worry! This is often temporary. Please check back later when you meet the criteria.
+                            </p>
+                            
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleRetake}
+                                    className="flex-1 py-3 bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <RefreshCw className="h-4 w-4" />
+                                    Retake Quiz
+                                </button>
+                                <button
+                                    onClick={onClose}
+                                    className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -135,7 +198,7 @@ export default function DonorEligibilityQuiz({ userId, onComplete, onClose }) {
     }
 
     const currentQ = questions[step];
-    const canProceed = answers[currentQ.key] !== '' && answers[currentQ.key] !== null;
+    const canProceed = answers[currentQ.key] !== undefined && answers[currentQ.key] !== null;
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -155,46 +218,38 @@ export default function DonorEligibilityQuiz({ userId, onComplete, onClose }) {
                     ✕
                 </button>
 
-                <div className="mt-6 mb-8">
+                <div className="mt-6 mb-6">
                     <span className="text-xs font-bold text-brand-600 tracking-wider uppercase">Question {step + 1} of {questions.length}</span>
                     <h2 className="text-xl font-bold text-slate-900 mt-2">{currentQ.question}</h2>
+                    
+                    {/* Explanation Box */}
+                    <div className="mt-4 bg-blue-50 p-3 rounded-lg flex items-start gap-3 text-blue-800 text-sm">
+                        <Info className="h-5 w-5 shrink-0 mt-0.5" />
+                        <p>{currentQ.explanation}</p>
+                    </div>
                 </div>
 
                 <div className="space-y-4 mb-8">
-                    {currentQ.type === 'number' ? (
-                        <div className="relative">
-                            <input
-                                type="number"
-                                value={answers[currentQ.key]}
-                                onChange={(e) => handleAnswer(e.target.value)}
-                                className="w-full text-center text-3xl font-bold border-b-2 border-slate-200 focus:border-brand-500 outline-none py-2"
-                                placeholder="0"
-                                autoFocus
-                            />
-                            <span className="absolute right-0 bottom-3 text-slate-400 font-medium">{currentQ.suffix}</span>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={() => handleAnswer(true)}
-                                className={`py-4 px-6 rounded-xl border-2 font-bold transition-all ${answers[currentQ.key] === true
-                                        ? 'border-brand-500 bg-brand-50 text-brand-700'
-                                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
-                                    }`}
-                            >
-                                Yes
-                            </button>
-                            <button
-                                onClick={() => handleAnswer(false)}
-                                className={`py-4 px-6 rounded-xl border-2 font-bold transition-all ${answers[currentQ.key] === false
-                                        ? 'border-brand-500 bg-brand-50 text-brand-700'
-                                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
-                                    }`}
-                            >
-                                No
-                            </button>
-                        </div>
-                    )}
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={() => handleAnswer(true)}
+                            className={`py-4 px-6 rounded-xl border-2 font-bold transition-all ${answers[currentQ.key] === true
+                                    ? 'border-brand-500 bg-brand-50 text-brand-700'
+                                    : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                                }`}
+                        >
+                            Yes
+                        </button>
+                        <button
+                            onClick={() => handleAnswer(false)}
+                            className={`py-4 px-6 rounded-xl border-2 font-bold transition-all ${answers[currentQ.key] === false
+                                    ? 'border-brand-500 bg-brand-50 text-brand-700'
+                                    : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                                }`}
+                        >
+                            No
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex justify-between items-center">
