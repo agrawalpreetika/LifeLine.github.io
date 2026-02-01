@@ -16,7 +16,8 @@ import { Toaster, toast } from 'react-hot-toast';
 export default function OrganizerPortal() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [camps, setCamps] = useState([]);
+  const [camps, setCamps] = useState([]); // Stores ONLY my camps for list
+  const [allCamps, setAllCamps] = useState([]); // Stores ALL camps for map
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('camps'); // 'camps' or 'schedule'
@@ -43,18 +44,15 @@ export default function OrganizerPortal() {
     if (!currentUser) return;
 
     try {
-      // 1. Load Camps (for list view)
-      // Ideally should use getOrganizerCamps to show only MY camps, but original code used getDonationCamps (all).
-      // Let's stick to getDonationCamps for the "Upcoming Camps" list if that was the intent, 
-      // OR switch to getOrganizerCamps to make it a true portal.
-      // The prompt implies "Organizer Portal", so they should see THEIR camps.
-      // But let's keep the original "Upcoming Camps" logic if it was meant to show global? 
-      // No, "Manage blood donation camps" implies MY camps.
-      // Let's switch to showing MY camps in the list.
+      // 1. Load MY Camps (for list view & appointments)
       const myCamps = await getOrganizerCamps(currentUser.uid);
       setCamps(myCamps);
 
-      // 2. Load Appointments for MY camps
+      // 2. Load ALL Upcoming Camps (for map view - conflict avoidance)
+      const globalCamps = await getDonationCamps(); // This fetches all active/upcoming camps
+      setAllCamps(globalCamps);
+
+      // 3. Load Appointments for MY camps
       const apptPromises = myCamps.map(camp => getVenueAppointments(camp.id));
       const apptResults = await Promise.all(apptPromises);
       const allAppts = apptResults.flat();
@@ -332,7 +330,18 @@ export default function OrganizerPortal() {
                 <p className="text-sm text-slate-500 mb-4">
                   Search for a venue or drag the marker to pinpoint the exact location.
                 </p>
-                <LocationPickerMap onLocationSelect={handleLocationSelect} />
+                {/* Pass ALL upcoming camps to the map, but filter out past ones */}
+                <LocationPickerMap
+                  onLocationSelect={handleLocationSelect}
+                  camps={allCamps.filter(c => {
+                    // Simple check for future date
+                    const campDate = new Date(c.date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return campDate >= today;
+                  })}
+                  currentUserId={currentUser.uid}
+                />
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
@@ -341,32 +350,39 @@ export default function OrganizerPortal() {
                   <p className="text-slate-500 text-center py-8">No camps found.</p>
                 ) : (
                   <div className="grid gap-4">
-                    {camps.map(camp => (
-                      <div key={camp.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-brand-200 transition-colors">
-                        <div>
-                          <h3 className="font-bold text-slate-900 text-lg">{camp.campName}</h3>
-                          <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
-                            <User className="h-3 w-3" /> Organized by {camp.organizerName}
-                          </p>
-                          <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
-                            <MapPin className="h-3 w-3" /> {camp.address}
-                          </p>
-                        </div>
-                        <div className="mt-3 sm:mt-0 text-right">
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-medium">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {camp.date}
+                    {camps
+                      .filter(c => {
+                        const campDate = new Date(c.date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return campDate >= today;
+                      })
+                      .map(camp => (
+                        <div key={camp.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-brand-200 transition-colors">
+                          <div>
+                            <h3 className="font-bold text-slate-900 text-lg">{camp.campName}</h3>
+                            <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
+                              <User className="h-3 w-3" /> Organized by {camp.organizerName}
+                            </p>
+                            <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
+                              <MapPin className="h-3 w-3" /> {camp.address}
+                            </p>
                           </div>
-                          {camp.startTime && camp.endTime && (
-                            <div className="mt-1 flex items-center justify-end gap-1 text-xs text-slate-500 font-medium">
-                              <Clock className="h-3 w-3" />
-                              {camp.startTime} - {camp.endTime}
+                          <div className="mt-3 sm:mt-0 text-right">
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-medium">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {camp.date}
                             </div>
-                          )}
-                          <p className="text-sm text-slate-400 mt-1">{camp.contact}</p>
+                            {camp.startTime && camp.endTime && (
+                              <div className="mt-1 flex items-center justify-end gap-1 text-xs text-slate-500 font-medium">
+                                <Clock className="h-3 w-3" />
+                                {camp.startTime} - {camp.endTime}
+                              </div>
+                            )}
+                            <p className="text-sm text-slate-400 mt-1">{camp.contact}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 )}
               </div>

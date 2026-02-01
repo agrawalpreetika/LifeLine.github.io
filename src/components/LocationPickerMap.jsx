@@ -89,11 +89,31 @@ function MapClickHandler({ setPosition, onLocationUpdate }) {
     return null;
 }
 
-export default function LocationPickerMap({ onLocationSelect }) {
+export default function LocationPickerMap({ onLocationSelect, camps = [], currentUserId }) {
     // Default center (e.g., New York)
     const [position, setPosition] = useState({ lat: 40.7128, lng: -74.0060 });
     const [address, setAddress] = useState('');
     const provider = new OpenStreetMapProvider();
+
+    // Red Icon for My Camps
+    const RedIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    // Blue Icon for Other Camps
+    const BlueIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
 
     // Helper to fetch address from coordinates (Reverse Geocoding)
     const fetchAddress = async (lat, lng) => {
@@ -167,6 +187,33 @@ export default function LocationPickerMap({ onLocationSelect }) {
                     setPosition={setPosition}
                     onLocationUpdate={handleMapClick}
                 />
+
+                {/* Render Markers for Upcoming Camps */}
+                {camps.map(camp => {
+                    const isMyCamp = camp.organizerId === currentUserId;
+                    return (
+                        camp.location && camp.location.lat && camp.location.lng && (
+                            <Marker
+                                key={camp.id}
+                                position={[camp.location.lat, camp.location.lng]}
+                                icon={isMyCamp ? RedIcon : BlueIcon}
+                            >
+                                <Popup>
+                                    <div className="p-1">
+                                        <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isMyCamp ? 'text-red-600' : 'text-blue-600'}`}>
+                                            {isMyCamp ? 'Your Camp' : 'External Organization'}
+                                        </div>
+                                        <h3 className="font-bold text-slate-900 text-sm">{camp.campName}</h3>
+                                        <div className="mt-1 text-xs text-slate-600">
+                                            <p className="font-medium">{new Date(camp.date).toDateString()}</p>
+                                            <p>{camp.startTime} - {camp.endTime}</p>
+                                        </div>
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        )
+                    );
+                })}
             </MapContainer>
 
             {/* Overlay Address Display (Optional) */}
