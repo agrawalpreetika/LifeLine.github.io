@@ -682,7 +682,7 @@ export const getDonorAppointments = async (donorId) => {
     const q = query(
       collection(db, 'appointments'),
       where('donorId', '==', donorId),
-      where('status', 'in', ['scheduled', 'completed', 'cancelled'])
+      where('status', 'in', ['scheduled', 'completed', 'cancelled', 'no-show'])
     );
     const snapshot = await getDocs(q);
     const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
