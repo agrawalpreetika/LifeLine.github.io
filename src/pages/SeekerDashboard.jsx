@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, Filter, Phone, Droplet, AlertCircle, Bell, Trash2, Building, User, Navigation, Heart, CheckCircle, XCircle, Archive, Clock, Share2, Copy, X, Loader2,Mail } from 'lucide-react';
+import { Search, MapPin, Filter, Phone, Droplet, AlertCircle, Bell, Trash2, Building, User, Navigation, Heart, CheckCircle, XCircle, Archive, Clock, Share2, Copy, X, Loader2, Mail, Mic, MicOff } from 'lucide-react';
 import { searchDonors, addToWatchlist, getWatchlist, deleteWatchlistItem, markWatchlistNotified, markWatchlistMatchFound, resetWatchlistMatch, subscribeToMatchingInventory, subscribeToAllInventory, subscribeToActiveDonors, requestBlood, subscribeToSentRequests, cancelRequest, archiveRequest, markRequestsFulfilled, getUserProfile } from '../lib/firestore';
 import { sendBloodRequestNotification } from '../lib/emailService';
 import { useAuth } from '../context/AuthContext';
 import { Toaster, toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import GlobalMap from '../components/GlobalMap';
 
 
@@ -31,6 +31,7 @@ function deg2rad(deg) {
 export default function SeekerDashboard() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState('hospitals'); // 'hospitals' or 'donors'
 
     // Search Filters
@@ -55,6 +56,28 @@ export default function SeekerDashboard() {
     const [sentRequests, setSentRequests] = useState([]);
     const [requestFilter, setRequestFilter] = useState('active'); // 'active' | 'past'
     const [seekerProfile, setSeekerProfile] = useState(null);
+
+    // Handle URL Params for Voice Search Auto-Execution
+    useEffect(() => {
+        const groupParam = searchParams.get('group');
+        const cityParam = searchParams.get('city');
+        const urgentParam = searchParams.get('urgent');
+
+        if (groupParam || cityParam) {
+            // Dismiss any lingering toasts from voice assistant
+            toast.dismiss();
+
+            if (groupParam) setBloodType(groupParam);
+            if (cityParam) setLocation(cityParam);
+
+            if (urgentParam === 'true') {
+                toast('Urgent Request Detected', { icon: '🚨' });
+            }
+
+            // Auto-trigger search
+            handleSearch(groupParam || '', cityParam || '');
+        }
+    }, [searchParams]);
 
     // Get User Location on mount
     useEffect(() => {
@@ -258,12 +281,116 @@ export default function SeekerDashboard() {
         }
     };
 
-    const handleSearch = async () => {
+    const [isListening, setIsListening] = useState(false);
+
+    const parseEmergencyText = (transcript) => {
+        const lowerText = transcript.toLowerCase();
+        let detectedType = '';
+        let detectedLoc = '';
+
+        // 1. Improved Blood Group Parsing (Priority-Based)
+        const cleanText = lowerText.replace(/\s+/g, '');
+        const bloodRegex = /(ab|a|b|o)(?:\+|-|plus|positive|minus|negative)/i;
+        const match = cleanText.match(bloodRegex);
+
+        if (match) {
+            const group = match[1].toUpperCase();
+            const signRaw = match[0].substring(group.length).toLowerCase();
+            const isPositive = signRaw.includes('+') || signRaw.includes('plus') || signRaw.includes('positive');
+            const sign = isPositive ? '+' : '-';
+            detectedType = `${group}${sign}`;
+        }
+
+        if (!detectedType && lowerText.includes('universal donor')) {
+            detectedType = 'O-';
+        }
+
+        // 2. Extract Location
+        const locMatch = lowerText.match(/\b(in|at|near|from)\s+(.+)/i);
+        if (locMatch && locMatch[2]) {
+            detectedLoc = locMatch[2].replace(/[.,?!]/g, '').trim();
+        }
+
+        // 3. Detect Urgency
+        const isUrgent = /urgent|emergency|critical|accident|help/.test(lowerText);
+
+        return { detectedType, detectedLoc, isUrgent };
+    };
+
+    const handleVoiceSearch = () => {
+        if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            toast.error("Voice search not supported in this browser.");
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-IN';
+        recognition.interimResults = true;
+        recognition.continuous = false;
+
+        recognition.onstart = () => {
+            setIsListening(true);
+            toast('Listening...', { icon: '🎙️' });
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+
+            // Show interim results in location box
+            setLocation(transcript);
+
+            if (event.results[0].isFinal) {
+                const { detectedType, detectedLoc, isUrgent } = parseEmergencyText(transcript);
+
+                if (isUrgent) {
+                    toast("Urgent request detected!", { icon: '🚨' });
+                }
+
+                if (detectedType) {
+                    setBloodType(detectedType);
+                }
+
+                if (detectedLoc) {
+                    setLocation(detectedLoc);
+                }
+
+                if (detectedType && detectedLoc) {
+                    toast.loading("Processing voice request...");
+                    handleSearch(detectedType, detectedLoc);
+                }
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech error", event.error);
+            setIsListening(false);
+            if (event.error === 'not-allowed') {
+                toast.error("Microphone permission denied.");
+            }
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+        };
+
+        recognition.start();
+    };
+
+    const handleSearch = async (typeOverride, locOverride) => {
         setLoading(true);
         setHasSearched(true);
+
+        // Handle arguments or fallback to state
+        // Note: typeOverride might be an Event object if called via onClick
+        const actualType = (typeof typeOverride === 'string') ? typeOverride : bloodType;
+        const actualLoc = (typeof locOverride === 'string') ? locOverride : location;
+
         try {
             // Search donors (and hospitals technically, but we filter)
-            const results = await searchDonors(bloodType, location);
+            const results = await searchDonors(actualType, actualLoc);
             // Filter to only show individual donors for the 'donors' tab
             // (Hospitals are handled by the real-time listener)
             const individualDonors = results.filter(r => r.type === 'donor');
@@ -303,7 +430,7 @@ export default function SeekerDashboard() {
             await loadWatchlist();
             toast.success('Added to watchlist. We will alert you when a donor is found!', {
                 icon: '🔔',
-                duration: 10000
+                duration: 7000
             });
         } catch (error) {
             console.error("Error adding to watchlist:", error);
@@ -726,11 +853,21 @@ export default function SeekerDashboard() {
                                 <input
                                     type="text"
                                     placeholder="e.g. New York"
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none bg-slate-50"
+                                    className="w-full pl-10 pr-12 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none bg-slate-50"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
                                 />
                                 <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-slate-400" />
+                                <button
+                                    onClick={handleVoiceSearch}
+                                    className={`absolute right-2 top-2 p-1.5 rounded-lg transition-all duration-300 ${isListening
+                                        ? 'bg-red-100 text-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] scale-110 animate-pulse'
+                                        : 'text-slate-400 hover:text-brand-600 hover:bg-slate-100'
+                                        }`}
+                                    title="Voice Search"
+                                >
+                                    {isListening ? <Mic className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                                </button>
                             </div>
                         </div>
 
@@ -814,7 +951,7 @@ export default function SeekerDashboard() {
                                                 </span>
                                             </div>
                                             <p className="text-xs text-slate-400 mt-2 line-clamp-3">
-                                                {hospital.address} 
+                                                {hospital.address}
                                             </p>
                                             {hospital.email && (
                                                 <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 truncate">
@@ -822,7 +959,7 @@ export default function SeekerDashboard() {
                                                     {hospital.email}
                                                 </p>
                                             )}
-                                            
+
                                         </div>
 
                                         {/* Right Side: Action Buttons */}
@@ -854,7 +991,7 @@ export default function SeekerDashboard() {
                                                     <span>No Phone</span>
                                                 </button>
                                             )}
-                                            
+
 
 
                                             <button

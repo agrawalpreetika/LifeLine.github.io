@@ -11,14 +11,15 @@ import DonationCampsPage from './pages/DonationCampsPage';
 import HospitalSignup from './pages/HospitalSignup';
 import HospitalDashboard from './pages/HospitalDashboard';
 import ProfileSettings from './pages/ProfileSettings';
-import { AuthProvider } from './context/AuthContext';
 import Chatbot from './components/Chatbot';
+import VoiceAssistant from './components/VoiceAssistant';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+        <div className="min-h-screen bg-slate-50 font-sans text-slate-900 relative">
           <Navbar />
           <main>
             <Routes>
@@ -36,6 +37,7 @@ function App() {
             </Routes>
           </main>
           <Chatbot />
+          <VoiceAssistant />
         </div>
       </Router>
     </AuthProvider>
