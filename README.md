@@ -2,7 +2,7 @@
 
 ![WhatsApp Image 2026-02-07 at 21 29 43](https://github.com/user-attachments/assets/efd3fd2a-b2f0-4eeb-975e-a63ab45e45cf)
 
-<p align="center" style="font-size: 32px; font-weight: bold;">
+<p align="center" style="font-size: 32px; font-weight: 3px;">
   Once a Blood-Donor, always a HERO!
 </p>
 
@@ -55,10 +55,9 @@ This project enhances healthcare accessibility by connecting hospitals, organiza
 
 ## Tech-Stack Used
 
-- **NodeJS** (ExpressJS)
-- **EJS**
-- **CSS**
-- **Bootstrap**
-- **JavaScript**
-- **MongoDB** (as Database)
-- **Ollama AI**
+- **TRAE**
+- **Frontend:** React, HTML, Tailwind, JavaScript
+- **Backend:** Firebase (Auth + Database + Hosting)
+- **AI: Trae AI Chatbot**
+- **Services:** OpenStreetMap API, EmailJS, Web Speech API, Google Calendar, Google Maps
+- **Tools:** TRAE, GitHub, Vercel, VS Code
