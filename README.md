@@ -9,4 +9,53 @@
 ## Introduction
 
 Team Name: **B +ve**
+
 **AM Hacks 2.0 Submission**
+
+## Description
+
+LifeLine is a technology-driven platform built to strengthen **emergency healthcare response**, enabling users to:
+
+- **Find nearby blood donors and hospitals** in real time.
+- **Access an emergency-aware chatbot** for instant guidance and support.
+
+- **Check eligibility and schedule appointments** seamlessly.
+
+- **Navigate using integrated maps** and contact hospitals or donors instantly.
+
+This project enhances healthcare accessibility by connecting hospitals, organizations, and citizens through a unified digital ecosystem, ensuring faster response when seconds matter
+
+## Features
+
+🩸 **Blood Group Smart Search**
+Search across registered donors and hospitals to instantly find required blood groups in one place.
+
+🗺️ **Map-Based Nearby Hospital Discovery**
+OpenStreetMap integration to display nearby hospitals and blood banks with navigation support.
+
+🔐 Privacy-Protected Donor Request Workflow
+Secure request system where personal donor details are not directly exposed.
+
+🏥 Real-Time Hospital Blood Stock Updates
+Hospitals can maintain and update live blood inventory for accurate availability.
+
+🎙️ Voice-Assisted Search & Navigation
+Microphone-based voice input lets users speak a blood group, location, or landmark — the system automatically redirects to the correct search page with fields pre-filled and results displayed.
+
+📋 Donor Eligibility Quiz
+Quick pre-screening and awareness quiz to educate donors before donation.
+
+📅 Donation Scheduling with Calendar Integration
+Users can book donation appointments and sync them with their calendar.
+
+🏅 Digital Donation Certificates
+Auto-generated certificates issued after successful donation at a hospital or camp.
+
+👀 Watchlist with Availability Alerts
+Users can track specific blood groups and receive alerts when they become available.
+
+🏕️ Camp Discovery & Organizer Portal
+Camp organizers can publish drives and users can discover nearby donation camps.
+
+🤖 Emergency Chatbot Assistance
+Instant guided chatbot support for emergency blood search and platform help.
