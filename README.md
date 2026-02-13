@@ -2,9 +2,9 @@
 
 ![WhatsApp Image 2026-02-07 at 21 29 43](https://github.com/user-attachments/assets/efd3fd2a-b2f0-4eeb-975e-a63ab45e45cf)
 
-<p align="center" style="font-size: 32px; font-weight: 3px;">
+<b align="center" style="font-size: 32px; font-weight: 3px;">
   Once a Blood-Donor, always a HERO!
-</p>
+</b>
 
 ## Introduction
 
@@ -61,3 +61,13 @@ This project enhances healthcare accessibility by connecting hospitals, organiza
 - **AI: Trae AI Chatbot**
 - **Services:** OpenStreetMap API, EmailJS, Web Speech API, Google Calendar, Google Maps
 - **Tools:** TRAE, GitHub, Vercel, VS Code
+
+## 🔗 Contributors
+
+- **Preetika Agrawal** - [GitHub](https://github.com/agrawalpreetika)
+- **Nikki Gautam** - [GitHub](https://github.com/nix-per)
+- **Neha** - [GitHub]()
+
+## Feedback
+
+Let us know if you need any modifications! 🚀
