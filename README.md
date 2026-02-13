@@ -2,7 +2,7 @@
 
 ![WhatsApp Image 2026-02-07 at 21 29 43](https://github.com/user-attachments/assets/efd3fd2a-b2f0-4eeb-975e-a63ab45e45cf)
 
-<p align="center" style="width: 200px; height: auto; text-align: center; font-size: 32px; font-weight: bold;" alt="LifeLine Logo">
+<p align="center" style="font-size: 32px; font-weight: bold;">
   Once a Blood-Donor, always a HERO!
 </p>
 
@@ -26,7 +26,7 @@ This project enhances healthcare accessibility by connecting hospitals, organiza
 ## Features
 
 🩸 **Blood Group Smart Search**
-  - Search across registered donors and hospitals to instantly find required blood groups in one place.
+- Search across registered donors and hospitals to instantly find required blood groups in one place.
 
 🗺️ **Map-Based Nearby Hospital Discovery**
 - OpenStreetMap integration to display nearby hospitals and blood banks with navigation support.
