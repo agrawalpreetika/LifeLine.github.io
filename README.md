@@ -12,6 +12,11 @@ Team Name: **B +ve**
 
 **AM Hacks 2.0 Submission**
 
+## Deployed Link
+```bash
+  https://life-line-two.vercel.app/
+```
+
 ## Description
 
 LifeLine is a technology-driven platform built to strengthen **emergency healthcare response**, enabling users to:
@@ -25,8 +30,7 @@ This project enhances healthcare accessibility by connecting hospitals, organiza
 
 ## Features
 
-🩸 **Blood Group Smart Search**
-- Search across registered donors and hospitals to instantly find required blood groups in one place.
+🩸 **Blood Group Smart Search** <br/> Search across registered donors and hospitals to instantly find required blood groups in one place.
 
 🗺️ **Map-Based Nearby Hospital Discovery**
 - OpenStreetMap integration to display nearby hospitals and blood banks with navigation support.
@@ -57,3 +61,6 @@ This project enhances healthcare accessibility by connecting hospitals, organiza
 
 🤖 **Emergency Chatbot Assistance**
 - Instant guided chatbot support for emergency blood search and platform help.
+
+
+
