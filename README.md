@@ -32,35 +32,33 @@ This project enhances healthcare accessibility by connecting hospitals, organiza
 
 🩸 **Blood Group Smart Search** <br/> Search across registered donors and hospitals to instantly find required blood groups in one place.
 
-🗺️ **Map-Based Nearby Hospital Discovery**
-- OpenStreetMap integration to display nearby hospitals and blood banks with navigation support.
+🗺️ **Map-Based Nearby Hospital Discovery** <br/> OpenStreetMap integration to display nearby hospitals and blood banks with navigation support.
 
-🔐 **Privacy-Protected Donor Request Workflow**
-- Secure request system where personal donor details are not directly exposed.
+🔐 **Privacy-Protected Donor Request Workflow** <br/> Secure request system where personal donor details are not directly exposed.
 
-🏥 **Real-Time Hospital Blood Stock Updates**
-- Hospitals can maintain and update live blood inventory for accurate availability.
+🏥 **Real-Time Hospital Blood Stock Updates** <br/> Hospitals can maintain and update live blood inventory for accurate availability.
 
-🎙️ **Voice-Assisted Search & Navigation**
-- Microphone-based voice input lets users speak a blood group, location, or landmark - the system automatically redirects to the correct search page with fields pre-filled and results displayed.
+🎙️ **Voice-Assisted Search & Navigation** <br/> Microphone-based voice input lets users speak a blood group, location, or landmark - the system automatically redirects to the correct search page with fields pre-filled and results displayed.
 
-📋 **Donor Eligibility Quiz**
-- Quick pre-screening and awareness quiz to educate donors before donation.
+📋 **Donor Eligibility Quiz** <br/> Quick pre-screening and awareness quiz to educate donors before donation.
 
-📅 **Donation Scheduling with Calendar Integration**
-- Users can book donation appointments and sync them with their calendar.
+📅 **Donation Scheduling with Calendar Integration** <br/> Users can book donation appointments and sync them with their calendar.
 
-🏅 **Digital Donation Certificates**
-- Auto-generated certificates issued after successful donation at a hospital or camp.
+🏅 **Digital Donation Certificates** <br/> Auto-generated certificates issued after successful donation at a hospital or camp.
 
-👀 **Watchlist with Availability Alerts**
-- Users can track specific blood groups and receive alerts when they become available.
+👀 **Watchlist with Availability Alerts** <br/> Users can track specific blood groups and receive alerts when they become available.
 
-🏕️ **Camp Discovery & Organizer Portal**
-- Camp organizers can publish drives and users can discover nearby donation camps.
+🏕️ **Camp Discovery & Organizer Portal** <br/> Camp organizers can publish drives and users can discover nearby donation camps.
 
-🤖 **Emergency Chatbot Assistance**
-- Instant guided chatbot support for emergency blood search and platform help.
+🤖 **Emergency Chatbot Assistance** <br/> Instant guided chatbot support for emergency blood search and platform help.
 
 
+## Tech-Stack Used
 
+- **NodeJS** (ExpressJS)
+- **EJS**
+- **CSS**
+- **Bootstrap**
+- **JavaScript**
+- **MongoDB** (as Database)
+- **Ollama AI**
